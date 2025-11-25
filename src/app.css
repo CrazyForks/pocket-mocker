@@ -1,1 +1,7 @@
 
+/* src/app.css */
+/* 全局重置，只会影响 Shadow DOM 内部 */
+:host {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+}

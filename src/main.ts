@@ -1,11 +1,11 @@
 import Dashboard from './lib/dashboard.svelte'
 import { initInterceptor } from './core/interceptor'
 import { mount } from 'svelte'
-import { loadRulesFromServer } from './core/store';
+import { initStore } from './core/store';
 
 // 1. 启动拦截核心
 initInterceptor();
-loadRulesFromServer();
+initStore();
 // 2. 挂载 Svelte 应用到 document.body
 const app = mount(Dashboard, {
   target: document.body,
