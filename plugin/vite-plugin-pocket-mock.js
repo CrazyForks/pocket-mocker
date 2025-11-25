@@ -1,11 +1,41 @@
 // vite-plugin-pocket-mock.ts
-const fs = require('fs');
-const path = require('path');
+import fs from 'fs';
+import path from 'path';
 
 // We store configuration in this file in the project root directory
 const CONFIG_FILE_NAME = 'pocket-mock.json';
 
-module.exports = function pocketMockPlugin() {
+// Create default rules for new installations
+function createDefaultRules() {
+  return [
+    {
+      id: 'demo-1',
+      method: 'GET',
+      url: '/api/demo',
+      response: {
+        status: 200,
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: {
+          code: 0,
+          message: 'Hello PocketMock',
+          data: {
+            timestamp: new Date().toISOString(),
+            version: '1.0.0'
+          }
+        }
+      },
+      enabled: true,
+      delay: 500,
+      status: 200,
+      headers: {},
+      createdAt: new Date().toISOString()
+    }
+  ];
+}
+
+export default function pocketMockPlugin() {
   return {
     name: 'vite-plugin-pocket-mock',
 
@@ -25,21 +55,35 @@ module.exports = function pocketMockPlugin() {
             if (fs.existsSync(configPath)) {
               // If file exists, read and return it
               const data = fs.readFileSync(configPath, 'utf-8');
-              res.setHeader('Content-Type', 'application/json');
-              res.end(data);
-              console.log(`[PocketMock] Read config file: ${CONFIG_FILE_NAME}`);
+
+              // Check if file is empty or contains invalid JSON
+              if (!data.trim() || data.trim() === '[]') {
+                console.log(`[PocketMock] Config file is empty, creating default rules`);
+                const defaultRules = createDefaultRules();
+                fs.writeFileSync(configPath, JSON.stringify(defaultRules, null, 2));
+                res.setHeader('Content-Type', 'application/json');
+                res.end(JSON.stringify(defaultRules));
+                console.log(`[PocketMock] Created and returned default rules`);
+              } else {
+                res.setHeader('Content-Type', 'application/json');
+                res.end(data);
+                console.log(`[PocketMock] Read config file: ${CONFIG_FILE_NAME}`);
+              }
             } else {
-              // If file doesn't exist, return empty array
+              // If file doesn't exist, create it with default rules
+              console.log(`[PocketMock] Config file not found, creating with default rules`);
+              const defaultRules = createDefaultRules();
+              fs.writeFileSync(configPath, JSON.stringify(defaultRules, null, 2));
               res.setHeader('Content-Type', 'application/json');
-              res.end('[]');
-              console.log(`[PocketMock] Config file not found, returning empty array`);
+              res.end(JSON.stringify(defaultRules));
+              console.log(`[PocketMock] Created config file with default rules`);
             }
             return; // Important: don't call next()
           } catch (e) {
-            console.error('[PocketMock] Failed to read config', e);
+            console.error('[PocketMock] Failed to read/write config', e);
             res.statusCode = 500;
             res.setHeader('Content-Type', 'application/json');
-            res.end(JSON.stringify({ error: 'Failed to read config' }));
+            res.end(JSON.stringify({ error: 'Failed to handle config' }));
             return;
           }
         }

@@ -5,6 +5,7 @@ import { type MockRule, updateRules } from './interceptor';
 const STORAGE_KEY = 'pocket_mock_rules_v1';
 let isServerMode = false; // Current runtime mode flag
 
+
 export const rules = writable<MockRule[]>([]);
 
 // === Initialization logic ===
@@ -26,12 +27,14 @@ export const initStore = async () => {
     if (res.ok) {
       isServerMode = true;
       const data = await res.json();
+
       if (Array.isArray(data) && data.length > 0) {
         rules.set(data);
-        console.log('[PocketMock] Connected to Dev Server, file sync mode');
+        console.log(`[PocketMock] Server Mode: Loaded ${data.length} rules from file (${data.filter((r: any) => r.enabled).length} enabled)`);
         return;
       } else {
         isServerMode = false; // Empty array, fallback to LocalStorage
+        console.log('[PocketMock] Server returned empty data, using LocalStorage');
       }
     } else {
       isServerMode = false;
@@ -47,7 +50,7 @@ export const initStore = async () => {
     if (json) {
       const data = JSON.parse(json);
       rules.set(data);
-      console.log('[PocketMock] LocalStorage mode, loaded rules:', data.length);
+      console.log(`[PocketMock] LocalStorage Mode: Loaded ${data.length} rules from browser (${data.filter((r: any) => r.enabled).length} enabled)`);
       return;
     }
   } catch (e) {
@@ -55,7 +58,7 @@ export const initStore = async () => {
   }
 
   // Fallback: use default data
-  rules.set([{
+  const defaultRules = [{
     id: 'demo-1',
     url: '/api/demo',
     method: 'GET',
@@ -64,8 +67,10 @@ export const initStore = async () => {
     delay: 500,
     status: 200,
     headers: {}
-  }]);
-  console.log('[PocketMock] LocalStorage mode, using default rules');
+  }];
+
+  rules.set(defaultRules);
+  console.log('[PocketMock] Created default rules');
 };
 
 // === Subscription and save logic ===
@@ -107,10 +112,10 @@ export const updateRuleResponse = (id: string, newResponseJson: string) => {
     rules.update(items => items.map(r =>
       r.id === id ? { ...r, response: parsed } : r
     ));
-    return true; // 更新成功
+    return true;
   } catch (e) {
-    console.error("JSON 格式错误", e);
-    return false; // 更新失败
+    console.error('[PocketMock] JSON format error:', e);
+    return false;
   }
 };
 
@@ -133,7 +138,6 @@ export const addRule = (url: string, method: string) => {
   rules.update(items => [newRule, ...items]);
 };
 
-
 export const deleteRule = (id: string) => {
   rules.update(items => items.filter(r => r.id !== id));
 }
@@ -146,7 +150,7 @@ export const updateRuleHeaders = (id: string, newHeadersJson: string) => {
     ));
     return true;
   } catch (e) {
-    console.error("Headers JSON 格式错误", e);
+    console.error('[PocketMock] Headers JSON format error:', e);
     return false;
   }
 };

@@ -760,7 +760,7 @@
   }
 
   .delay-control .label {
-    min-width: 75px; /* Fixed width to prevent jitter */
+    min-width: 80px; /* Fixed width to prevent jitter */
     font-variant-numeric: tabular-nums; /* Tabular numbers */
   }
 

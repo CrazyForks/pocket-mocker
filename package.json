@@ -5,7 +5,7 @@
   "type": "module",
   "files": [
     "dist",
-    "vite-plugin-pocket-mock.js"
+    "plugin"
   ],
   "main": "./dist/pocket-mock.umd.js",
   "module": "./dist/pocket-mock.es.js",
@@ -17,7 +17,9 @@
       "require": "./dist/pocket-mock.umd.js"
     },
     "./vite-plugin": {
-      "import": "./vite-plugin-pocket-mock.js"
+      "types": "./plugin/vite-plugin-pocket-mock.d.ts",
+      "import": "./plugin/vite-plugin-pocket-mock.js",
+      "require": "./plugin/vite-plugin-pocket-mock.js"
     }
   },
   "scripts": {
