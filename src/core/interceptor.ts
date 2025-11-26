@@ -1,5 +1,6 @@
 import { requestLogs } from "./log-store";
 import { appReady } from './store';
+import { matchRoute } from './matcher';
 
 export interface MockRule {
   id: string;
@@ -15,9 +16,15 @@ export interface MockRule {
 // Current rule list
 let activeRules: MockRule[] = []
 
+function getSpecificity(url: string): number {
+  if (url.includes('*')) return 10;
+  if (url.includes(':')) return 50;
+  return 100;
+}
+
 // Method for external updates to rules
 export function updateRules(rules: MockRule[]) {
-  activeRules = rules
+  activeRules = [...rules].sort((a, b) => getSpecificity(b.url) - getSpecificity(a.url));
 }
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -43,9 +50,7 @@ export function patchFetch() {
     // 查找匹配且启用的规则
     const matchedRule = activeRules.find(r => {
       if (!r.enabled || r.method !== method) return false;
-      const isExactMatch = url === r.url || url.endsWith(r.url);
-      const isIncludeMatch = url.includes(r.url);
-      return isExactMatch || isIncludeMatch;
+      return matchRoute(r.url, url).match;
     });
 
     if (matchedRule) {
@@ -130,7 +135,7 @@ function patchXHR() {
           await appReady;
 
           const matchedRule = activeRules.find(r =>
-            r.enabled && this._url.includes(r.url) && r.method === this._method
+            r.enabled && r.method === this._method && matchRoute(r.url, this._url).match
           );
 
           if (matchedRule) {
