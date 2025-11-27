@@ -780,12 +780,16 @@
 
   .editor-content {
     padding: 12px;
+    min-height: 200px;
+    display: flex;
+    flex-direction: column;
   }
 
   .config-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 12px;
+    flex: 1;
   }
 
   .url-group {
