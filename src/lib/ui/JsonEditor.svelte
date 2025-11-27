@@ -1,6 +1,6 @@
 <script lang="ts">
   import { onMount, onDestroy, createEventDispatcher } from 'svelte';
-  import { EditorView, basicSetup } from '@codemirror/basic-setup';
+  import { EditorView, basicSetup } from 'codemirror';
   import { EditorState } from '@codemirror/state';
   import { json } from '@codemirror/lang-json';
   import { oneDark } from '@codemirror/theme-one-dark';
@@ -56,21 +56,21 @@
     height: 100%;
     width: 100%;
     overflow: auto; /* Ensures scrollability if content exceeds bounds */
-    border-radius: 4px;
     border: 1px solid var(--pm-border); /* Use existing border variable */
+    border-radius: 4px; /* Apply to container */
   }
 
   /* Override CodeMirror's default background to match theme */
-  .cm-editor {
+  :global(.cm-editor) {
     height: 100%;
     background-color: var(--pm-input-bg) !important; /* Use existing input background variable */
-    border-radius: 4px;
+    border-radius: 4px; /* Ensure inner editor also respects border-radius visually */
     font-family: 'Menlo', 'Monaco', monospace !important; /* Match existing code editor font */
     font-size: 12px !important; /* Match existing code editor font size */
   }
 
   /* Adjust CodeMirror scroll bars if needed */
-  .cm-scroller {
+  :global(.cm-scroller) {
     overflow: auto;
   }
 </style>
