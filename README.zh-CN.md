@@ -8,6 +8,16 @@
 
 [English](README.md) | **中文**
 
+## 🎥 演示视频
+
+<div align="center">
+  <a href="https://github.com/tianchangNorth/pocket-mock/raw/main/docs/pcoket-mocker.mp4" target="_blank">
+    <img src="https://img.shields.io/badge/视频-演示-blue?style=for-the-badge&logo=youtube" alt="演示视频">
+  </a>
+</div>
+
+[▶️ 观看完整演示 (4.3 MB MP4)](https://github.com/tianchangNorth/pocket-mock/raw/main/docs/pcoket-mocker.mp4)
+
 **PocketMock** 是一款零侵入的前端 Mock 工具。与 Postman 或传统的 `mock.js` 不同，它直接**嵌入在你的页面中**，让你在开发时可以实时拦截 `fetch` 和 `XMLHttpRequest`，动态修改响应数据、模拟网络延迟和异常状态码。
 
 ## ✨ 核心特性
@@ -71,6 +81,14 @@ export default defineConfig({
 运行 `npm run dev`。PocketMock 会自动检测到插件环境，并切换到 **服务器模式**。
 
 ## 进阶功能
+
+### 🎥 视频教程
+
+<div align="center">
+  <a href="https://github.com/tianchangNorth/pocket-mock/raw/main/docs/pcoket-mocker.mp4" target="_blank">
+    <img src="https://img.shields.io/badge/🎬-功能演示-blue?style=for-the-badge" alt="功能演示">
+  </a>
+</div>
 
 ### 智能 Mock 数据生成
 

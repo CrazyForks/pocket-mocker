@@ -9,6 +9,16 @@
 
 **English** | [中文](README.zh-CN.md)
 
+## 🎥 Demo Video
+
+<div align="center">
+  <a href="https://github.com/tianchangNorth/pocket-mock/raw/main/docs/pcoket-mocker.mp4" target="_blank">
+    <img src="https://img.shields.io/badge/Video-Demo-blue?style=for-the-badge&logo=youtube" alt="Demo Video">
+  </a>
+</div>
+
+[▶️ Watch Full Demo (4.3 MB MP4)](https://github.com/tianchangNorth/pocket-mock/raw/main/docs/pcoket-mocker.mp4)
+
 **PocketMock** is a zero-intrusion frontend Mock tool. Unlike Postman or traditional `mock.js`, it embeds directly **into your page**, allowing you to intercept `fetch` and `XMLHttpRequest` in real-time during development, dynamically modify response data, simulate network latency, and test error status codes.
 
 ## ✨ Features
@@ -73,6 +83,14 @@ export default defineConfig({
 Run `npm run dev`. PocketMock automatically detects the plugin environment and switches to **Server Mode**.
 
 ## Advanced Features
+
+### 🎥 Video Tutorial
+
+<div align="center">
+  <a href="https://github.com/tianchangNorth/pocket-mock/raw/main/docs/pcoket-mocker.mp4" target="_blank">
+    <img src="https://img.shields.io/badge/🎬-功能演示-blue?style=for-the-badge" alt="功能演示">
+  </a>
+</div>
 
 ### Smart Mock Data Generation
 
