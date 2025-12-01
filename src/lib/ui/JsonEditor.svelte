@@ -41,39 +41,8 @@
           javascript(),
           isDark ? oneDark : [], // Conditionally apply Dark Theme
           EditorView.lineWrapping,
-          // Ensure CodeMirror styles adapt to theme or environment
           EditorView.theme({
-            "&": { height: "100%" }, // Ensure editor fills container
-            ".cm-content": {
-              padding: "10px 0",
-              caretColor: "var(--pm-text-primary)"
-            },
-            ".cm-line": {
-              padding: "0 10px"
-            },
-            // Use CSS variables for gutters to match theme if oneDark is NOT active
-            ".cm-gutters": {
-              backgroundColor: "var(--pm-input-bg)",
-              borderRight: "1px solid var(--pm-border)",
-              color: "var(--pm-text-secondary)"
-            },
-            ".cm-activeLine": {
-              backgroundColor: "rgba(128, 128, 128, 0.1)"
-            },
-            ".cm-activeLineGutter": {
-              backgroundColor: "rgba(128, 128, 128, 0.1)"
-            },
-            // Enhanced selection styling
-            "&.cm-focused .cm-selectionBackground, .cm-selectionBackground, .cm-content ::selection": {
-              backgroundColor: "rgba(59, 130, 246, 0.3) !important"
-            },
-            "&.cm-focused .cm-selectionLayer .cm-selectionBackground": {
-              backgroundColor: "rgba(59, 130, 246, 0.3) !important"
-            },
-            // WebKit selection for better visibility
-            ".cm-content ::-moz-selection": {
-              backgroundColor: "rgba(59, 130, 246, 0.3) !important"
-            }
+            "&": { height: "100%", fontSize: "13px" }
           }),
           EditorView.updateListener.of((update:any) => {
             if (update.docChanged) {
@@ -141,97 +110,24 @@
     box-shadow: 0 0 0 1px var(--pm-primary, #666);
   }
 
-  /* Ensure CodeMirror fills the container completely */
-  :global(.cm-editor) {
-    height: 100% !important;
-    width: 100% !important;
-    background-color: var(--pm-input-bg) !important;
-    border-radius: 4px;
-    font-family: 'Menlo', 'Monaco', 'Courier New', monospace !important;
-    font-size: 13px !important;
-    line-height: 1.5 !important;
-    color: var(--pm-text-primary) !important; /* Ensure text color adapts if no theme */
-  }
-
-  /* Ensure the scroller fills the editor */
-  :global(.cm-scroller) {
-    height: 100% !important;
-    overflow: auto !important;
-    background-color: var(--pm-input-bg) !important;
-  }
-
-  /* Ensure content area matches background */
-  :global(.cm-content) {
-    background-color: var(--pm-input-bg) !important;
-    padding: 12px !important;
-    min-height: 100% !important;
-    box-sizing: border-box !important;
-  }
-
-  /* Fix line background */
-  :global(.cm-line) {
-    background-color: transparent !important;
-  }
-
-  /* Remove CodeMirror's own focus indicators to prevent jumping */
-  :global(.cm-editor.cm-focused) {
-    outline: none !important;
-    border: none !important;
-    box-shadow: none !important;
-  }
-
-  /* Ensure no outline on content when focused */
-  :global(.cm-content) {
-    outline: none !important;
-  }
-
-  /* Improve scrollbars */
+  /* Custom scrollbar styles for CodeMirror */
   :global(.cm-scroller::-webkit-scrollbar) {
     width: 8px;
     height: 8px;
   }
   :global(.cm-scroller::-webkit-scrollbar-track) {
-    background: var(--pm-input-bg) !important;
+    background: var(--pm-input-bg);
+    border-radius: 4px;
   }
   :global(.cm-scroller::-webkit-scrollbar-thumb) {
-    background: var(--pm-text-secondary) !important;
+    background: var(--pm-text-secondary);
     border-radius: 4px;
-    border: none;
+    border: none; /* Removed border to prevent double border with track */
   }
   :global(.cm-scroller::-webkit-scrollbar-thumb:hover) {
-    background: var(--pm-text-primary) !important;
+    background: var(--pm-text-primary);
   }
   :global(.cm-scroller::-webkit-scrollbar-corner) {
-    background: var(--pm-input-bg) !important;
-  }
-
-  /* Enhanced selection styling with higher specificity */
-  :global(.cm-editor.cm-focused .cm-selectionLayer .cm-selectionBackground),
-  :global(.cm-editor .cm-selectionLayer .cm-selectionBackground) {
-    background-color: rgba(59, 130, 246, 0.3) !important;
-  }
-
-  /* Webkit selection */
-  :global(.cm-editor .cm-content ::selection) {
-    background-color: rgba(59, 130, 246, 0.3) !important;
-  }
-
-  /* Firefox selection */
-  :global(.cm-editor .cm-content ::-moz-selection) {
-    background-color: rgba(59, 130, 246, 0.3) !important;
-  }
-
-  /* Force selection background for all cases */
-  :global(.cm-editor .cm-content .cm-selectionBackground) {
-    background-color: rgba(59, 130, 246, 0.3) !important;
-  }
-
-  /* Debug info styling */
-  :global(.debug-info ){
-    padding: 12px;
-    color: var(--pm-text-secondary);
-    font-size: 12px;
-    background-color: var(--pm-input-bg);
-    border-radius: 4px;
+    background: transparent;
   }
 </style>
