@@ -1,4 +1,4 @@
-# 🛠️ PocketMock
+# PocketMocker
 
 > **所见即所得的浏览器端可视化 HTTP 调试工具。**
 > 一款轻量级、可视化的浏览器内 HTTP Mock 工具，专为现代前端开发而设计。

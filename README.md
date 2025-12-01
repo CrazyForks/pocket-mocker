@@ -1,4 +1,4 @@
-# 🛠️ PocketMock
+# PocketMocker
 
 > **Visual in-browser HTTP mocking tool for modern frontend development.**
 >
