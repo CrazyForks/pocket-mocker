@@ -128,7 +128,8 @@ function inferMockValue(key: string, value: any): any {
 
   // Heuristics for common fields
   if (lowerKey === 'id' || lowerKey.endsWith('_id')) return '@guid';
-  if (lowerKey.includes('name')) return '@cname'; // Or @string(5)
+  if (lowerKey === 'name') return '@name'; // Changed: name should map to @name (English name)
+if (lowerKey === 'username') return '@name'; // username should also map to @name (English name)
   if (lowerKey.includes('avatar') || lowerKey.includes('image') || lowerKey.includes('photo')) return '@image(200x200)';
   if (lowerKey.includes('time') || lowerKey.includes('date') || lowerKey.includes('at')) return '@date';
   if (lowerKey.includes('intro') || lowerKey.includes('desc')) return '@string(20)';

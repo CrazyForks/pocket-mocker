@@ -107,7 +107,7 @@ describe('importPostmanCollection', () => {
     const response = rules[0].response;
 
     expect(response.id).toBe('@guid'); // Automatically added ID
-    expect(response.name).toBe('@cname'); // Inferred name
+    expect(response.name).toBe('@name'); // Inferred name
     expect(response.avatar).toBe('@image(200x200)'); // Inferred image
     expect(response.age).toBe('@integer(1,100)'); // Inferred integer
     expect(response.metadata.created_at).toBe('@date'); // Inferred date in nested object

@@ -145,15 +145,15 @@ export const updateRuleDelay = (id: string, delay: number) => {
   rules.update(items => items.map(r => r.id === id ? { ...r, delay } : r));
 };
 
-export const addRule = (url: string, method: string, initialResponse?: any) => {
+export const addRule = (url: string, method: string, initialResponse?: any, delay: number = 0, status: number = 200) => {
   const newRule: MockRule = {
-    id: Date.now().toString(),
+    id: Date.now().toString() + Math.random().toString(36).substring(2, 9),
     url,
     method,
     response: initialResponse || { message: "Hello PocketMock" },
     enabled: true,
-    delay: 0,
-    status: 200,
+    delay,
+    status,
     headers: {}
   };
   rules.update(items => [newRule, ...items]);
