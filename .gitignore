@@ -26,3 +26,4 @@ dist-ssr
 demo/*
 pocket-mock.json
 demo-dist/*
+scripts/*
