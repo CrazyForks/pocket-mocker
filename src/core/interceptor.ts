@@ -250,7 +250,7 @@ function patchXHR() {
     private _method: string = 'GET';
     private _startTime: number = 0;
     private _requestHeaders: Headers = new Headers();
-    private _requestBody: any = undefined; // raw body sent
+    private _requestBody: any = undefined;
 
     open(method: string, url: string | URL, ...args: any[]) {
       this._url = url.toString();
@@ -266,7 +266,7 @@ function patchXHR() {
     }
 
     send(body?: any) {
-      this._requestBody = body; // Store raw body sent
+      this._requestBody = body;
 
       if (this._url.includes('/__pocket_mock/')) {
         super.send(body);
@@ -284,19 +284,19 @@ function patchXHR() {
 
           if (matchResult) {
             const { rule, match } = matchResult;
-            // console.log(`[PocketMock] XHR intercepted: ${this._method} ${this._url}`); // Remove log
+
 
             if (rule.delay > 0) await sleep(rule.delay);
 
             let resolvedResponse: any = rule.response;
             let bodyData: any = this._requestBody;
-            if (bodyData instanceof FormData) { // Convert FormData to object for easier access
+            if (bodyData instanceof FormData) {
               const formDataObj: Record<string, string> = {};
               for (const pair of bodyData.entries()) {
                 formDataObj[pair[0]] = pair[1].toString();
               }
               bodyData = formDataObj;
-            } else if (bodyData instanceof URLSearchParams) { // Convert URLSearchParams to object
+            } else if (bodyData instanceof URLSearchParams) {
               const urlSearchParamsObj: Record<string, string> = {};
               for (const pair of bodyData.entries()) {
                 urlSearchParamsObj[pair[0]] = pair[1].toString();
@@ -312,169 +312,153 @@ function patchXHR() {
                   const evaluated = new Function('return ' + rule.response)();
                   resolvedResponse = evaluated;
                 } catch (e) {
-                  // Keep as string
                 }
               }
             }
 
             if (typeof resolvedResponse === 'function') {
               const mockRequest = await createMockRequest(this._url, this._method, this._requestHeaders, bodyData, match.params);
-              // console.log('[PocketMock] Executing dynamic response (XHR) with req:', mockRequest); // Remove log
               try {
                 resolvedResponse = await Promise.resolve(resolvedResponse(mockRequest));
-                // console.log('[PocketMock] Dynamic response result:', resolvedResponse); // Remove log
               } catch (e) {
-                // console.error('[PocketMock] Error executing response function:', e); // Remove log
                 resolvedResponse = { status: 500, body: { error: 'Mock function execution failed' } };
               }
             }
 
-            // Add this new section for smart mock data generation
             if (resolvedResponse && typeof resolvedResponse === 'object' && !Object.prototype.hasOwnProperty.call(resolvedResponse, 'body')) {
-                try {
-                  resolvedResponse = generateMockData(resolvedResponse);
-                } catch (e) {
-                  console.error('[PocketMock] Error generating mock data (XHR):', e);
-                  // Keep original response or set error message
-                }
+              try {
+                resolvedResponse = generateMockData(resolvedResponse);
+              } catch (e) {
+                console.error('[PocketMock] Error generating mock data (XHR):', e);
+              }
             }
 
             const duration = Math.round(performance.now() - this._startTime);
 
-            // Handle full Response object from function - XHR specific handling
-              if (resolvedResponse instanceof Response) {
-                // For XHR, we need to extract properties from Response and set them on the XHR instance
-                const responseText = await resolvedResponse.text();
-                const responseStatus = resolvedResponse.status;
-                const responseHeaders = Object.fromEntries(resolvedResponse.headers.entries());
+            if (resolvedResponse instanceof Response) {
+              const responseText = await resolvedResponse.text();
+              const responseStatus = resolvedResponse.status;
+              const responseHeaders = Object.fromEntries(resolvedResponse.headers.entries());
 
-                // Reconstruct as a compatible object
-                resolvedResponse = {
-                  body: responseText,
-                  status: responseStatus,
-                  headers: responseHeaders,
-                };
-              }
-
-              let actualResponseData = resolvedResponse;
-              let actualHeaders = rule.headers || {};
-              let actualStatus = rule.status;
-
-              // Handle { body, status, headers } object from function (or standard rule.response)
-              if (resolvedResponse && typeof resolvedResponse === 'object' && Object.prototype.hasOwnProperty.call(resolvedResponse, 'body')) {
-                actualResponseData = resolvedResponse.body;
-                actualStatus = resolvedResponse.status || rule.status;
-                actualHeaders = { ...actualHeaders, ...resolvedResponse.headers };
-              }
-
-              const responseData = (typeof actualResponseData === 'string' ? actualResponseData : JSON.stringify(actualResponseData)) || '{}';
-
-              // console.log('[PocketMock] XHR responseData being set:', responseData); // Remove log
-
-              Object.defineProperty(this, 'status', { value: actualStatus, writable: true });
-              Object.defineProperty(this, 'statusText', { value: actualStatus === 200 ? 'OK' : 'Mocked', writable: true });
-              Object.defineProperty(this, 'readyState', { value: 4, writable: true });
-              Object.defineProperty(this, 'response', { value: responseData, writable: true });
-              Object.defineProperty(this, 'responseText', { value: responseData, writable: true });
-              Object.defineProperty(this, 'responseURL', { value: this._url, writable: true });
-
-              const finalHeaders = Object.entries({
-                'content-type': 'application/json', // Default to JSON content type
-                ...actualHeaders
-              }).map(([k, v]) => `${k}: ${v}`).join('\r\n');
-
-              this.getAllResponseHeaders = () => finalHeaders;
-              this.getResponseHeader = (name: string) => actualHeaders[name.toLowerCase()] || null;
-
-              requestLogs.add({
-                method: this._method, url: this._url, status: actualStatus, timestamp: Date.now(), duration, isMock: true,
-                responseBody: responseData // Store response body for mock too
-              });
-
-              setTimeout(() => {
-                this.dispatchEvent(new ProgressEvent('loadstart'));
-                this.dispatchEvent(new ProgressEvent('progress', {
-                  lengthComputable: true,
-                  loaded: responseData.length,
-                  total: responseData.length
-                }));
-                this.dispatchEvent(new ProgressEvent('load', {
-                  lengthComputable: true,
-                  loaded: responseData.length,
-                  total: responseData.length
-                }));
-                this.dispatchEvent(new ProgressEvent('loadend', {
-                  lengthComputable: true,
-                  loaded: responseData.length,
-                  total: responseData.length
-                }));
-              }, 1);
-
-              return; // 拦截成功，不再发送真实请求
+              resolvedResponse = {
+                body: responseText,
+                status: responseStatus,
+                headers: responseHeaders,
+              };
             }
 
-            // === Real Request Monitoring for XHR ===
-            // Attach listeners BEFORE calling super.send to ensure they are active.
-            // Note: XHR event model is different from Fetch, response is available after loadend.
-            this.addEventListener('loadend', () => { // Use loadend for final state
-              const duration = Math.round(performance.now() - this._startTime);
-              let responseBody = '';
-              try {
-                // Try to get response text
-                // XHR.response can be object (json), string (text), Blob, ArrayBuffer
-                if (!this.responseType || this.responseType === 'text') { // Default or text
-                  responseBody = this.responseText;
-                } else if (this.responseType === 'json') { // Already parsed json
-                  responseBody = JSON.stringify(this.response);
-                } else { // Blob, ArrayBuffer, etc.
-                  responseBody = `[${this.responseType} Data]`
-                }
-              } catch (e) {
-                responseBody = '[Error reading body]';
-              }
+            let actualResponseData = resolvedResponse;
+            let actualHeaders = rule.headers || {};
+            let actualStatus = rule.status;
 
-              requestLogs.add({
-                method: this._method,
-                url: this._url,
-                status: this.status,
-                timestamp: Date.now(),
-                duration,
-                isMock: false,
-                responseBody
-              });
+            if (resolvedResponse && typeof resolvedResponse === 'object' && Object.prototype.hasOwnProperty.call(resolvedResponse, 'body')) {
+              actualResponseData = resolvedResponse.body;
+              actualStatus = resolvedResponse.status || rule.status;
+              actualHeaders = { ...actualHeaders, ...resolvedResponse.headers };
+            }
+
+            const responseData = (typeof actualResponseData === 'string' ? actualResponseData : JSON.stringify(actualResponseData)) || '{}';
+
+
+            Object.defineProperty(this, 'status', { value: actualStatus, writable: true });
+            Object.defineProperty(this, 'statusText', { value: actualStatus === 200 ? 'OK' : 'Mocked', writable: true });
+            Object.defineProperty(this, 'readyState', { value: 4, writable: true });
+            Object.defineProperty(this, 'response', { value: responseData, writable: true });
+            Object.defineProperty(this, 'responseText', { value: responseData, writable: true });
+            Object.defineProperty(this, 'responseURL', { value: this._url, writable: true });
+
+            const finalHeaders = Object.entries({
+              'content-type': 'application/json',
+              ...actualHeaders
+            }).map(([k, v]) => `${k}: ${v}`).join('\r\n');
+
+            this.getAllResponseHeaders = () => finalHeaders;
+            this.getResponseHeader = (name: string) => actualHeaders[name.toLowerCase()] || null;
+
+            requestLogs.add({
+              method: this._method, url: this._url, status: actualStatus, timestamp: Date.now(), duration, isMock: true,
+              responseBody: responseData
             });
 
-            this.addEventListener('error', () => {
-              requestLogs.add({
-                method: this._method,
-                url: this._url,
-                status: this.status || 0, // XHR status might be 0 on network error
-                timestamp: Date.now(),
-                duration: Math.round(performance.now() - this._startTime),
-                isMock: false,
-                responseBody: '[Network Error]'
-              });
-            });
+            setTimeout(() => {
+              this.dispatchEvent(new ProgressEvent('loadstart'));
+              this.dispatchEvent(new ProgressEvent('progress', {
+                lengthComputable: true,
+                loaded: responseData.length,
+                total: responseData.length
+              }));
+              this.dispatchEvent(new ProgressEvent('load', {
+                lengthComputable: true,
+                loaded: responseData.length,
+                total: responseData.length
+              }));
+              this.dispatchEvent(new ProgressEvent('loadend', {
+                lengthComputable: true,
+                loaded: responseData.length,
+                total: responseData.length
+              }));
+            }, 1);
 
-
-            // 未命中规则，透传
-            super.send(body);
-
-          } catch (error) {
-            // console.error('[PocketMock] XHR Error:', error); // Remove log
-            super.send(body);
+            return;
           }
-        }) ();
-      }
+
+          // === Real Request Monitoring for XHR ===
+          // Attach listeners BEFORE calling super.send to ensure they are active.
+          // Note: XHR event model is different from Fetch, response is available after loadend.
+          this.addEventListener('loadend', () => { // Use loadend for final state
+            const duration = Math.round(performance.now() - this._startTime);
+            let responseBody = '';
+            try {
+              if (!this.responseType || this.responseType === 'text') {
+                responseBody = this.responseText;
+              } else if (this.responseType === 'json') {
+                responseBody = JSON.stringify(this.response);
+              } else {
+                responseBody = `[${this.responseType} Data]`
+              }
+            } catch (e) {
+              responseBody = '[Error reading body]';
+            }
+
+            requestLogs.add({
+              method: this._method,
+              url: this._url,
+              status: this.status,
+              timestamp: Date.now(),
+              duration,
+              isMock: false,
+              responseBody
+            });
+          });
+
+          this.addEventListener('error', () => {
+            requestLogs.add({
+              method: this._method,
+              url: this._url,
+              status: this.status || 0,
+              timestamp: Date.now(),
+              duration: Math.round(performance.now() - this._startTime),
+              isMock: false,
+              responseBody: '[Network Error]'
+            });
+          });
+
+          super.send(body);
+
+        } catch (error) {
+
+          super.send(body);
+        }
+      })();
+    }
   }
 
   // @ts-ignore
   window.XMLHttpRequest = PocketXHR;
-  }
+}
 
-  export function initInterceptor() {
-    // console.log('%c PocketMock started (Fetch + XHR) ', 'background: #222; color: #bada55'); // Remove log
-    patchFetch();
-    patchXHR();
-  }
+export function initInterceptor() {
+  patchFetch();
+  patchXHR();
+}
 

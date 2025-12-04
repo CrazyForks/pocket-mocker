@@ -3,15 +3,8 @@ import { initInterceptor } from './core/interceptor';
 import { initStore, addRule } from './core/store';
 import axios from 'axios';
 
-// ==========================================
-// 1. Initialize PocketMock Core
-// ==========================================
 initInterceptor();
 initStore();
-
-// ==========================================
-// 2. Setup Demo Rules (The "Script" for the Video)
-// ==========================================
 
 // Scenario A: Smart Mock (Realistic Data)
 const profileRule = {
@@ -78,14 +71,8 @@ const errorRule = {
 };
 addRule(errorRule.url, errorRule.method, errorRule.response);
 
-// ==========================================
-// 3. Mount the Tool (The Widget)
-// ==========================================
 new Dashboard({ target: document.body });
 
-// ==========================================
-// 4. Render the Demo UI (The Stage)
-// ==========================================
 const app = document.querySelector<HTMLDivElement>('#app')!;
 
 app.innerHTML = `

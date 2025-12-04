@@ -8,8 +8,8 @@ export interface PostmanCollection {
 
 export interface PostmanItem {
   name: string;
-  item?: PostmanItem[]; // Folder
-  request?: PostmanRequest; // Request
+  item?: PostmanItem[];
+  request?: PostmanRequest;
 }
 
 export interface PostmanRequest {
@@ -40,8 +40,6 @@ export interface PostmanUrl {
   query?: { key: string; value: string }[];
   variable?: any[];
 }
-
-// === OpenAPI 3.0 Types ===
 
 export interface OpenAPIDocument {
   openapi: string;

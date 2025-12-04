@@ -12,11 +12,8 @@
   import Toast from './ui/Toast.svelte';
   import { showToast } from './ui/toast-store';
   
-  // Control panel expand/collapse
   let minimized = false;
-  // Currently editing rule ID
   let editingId: string | null = null;
-  // Temporary edit content strings
   let editContent = "";
   let editHeadersContent = "";
   let editUrl = "";
@@ -26,13 +23,11 @@
   
   let activeTab: 'body' | 'headers' = 'body';
   
-  // Main tab status
   let activeMainTab: 'rules' | 'network' = 'rules';
   
-  // Rule Filter State
   let ruleFilterText = "";
   let ruleMethodFilter = "ALL";
-  let ruleStatusFilter = "ALL"; // ALL | ENABLED | DISABLED
+  let ruleStatusFilter = "ALL";
 
   $: filteredRules = $rules.filter(rule => {
     const matchText = rule.url.toLowerCase().includes(ruleFilterText.toLowerCase());
@@ -43,12 +38,10 @@
     return matchText && matchMethod && matchStatus;
   });
 
-  // Network Panel State
   let networkFilter = "";
   let networkTypeFilter: 'all' | 'mock' | 'real' = 'all';
   let expandedLogId: string | null = null;
   
-  // File input ref
   let fileInput: HTMLInputElement;
 
   $: filteredLogs = $requestLogs.filter(log => {
@@ -63,7 +56,6 @@
     expandedLogId = expandedLogId === id ? null : id;
   }
 
-  // New rule status
   let showAddPanel = false;
   let newRuleUrl = "";
   let newRuleMethod = "GET";
@@ -89,13 +81,10 @@
         let newRules: any[] = [];
         let formatName = '';
 
-        // Detect format
         if (json.info && json.item) {
-           // Postman
            formatName = 'Postman Collection';
            newRules = importPostmanCollection(json);
         } else if (json.openapi || json.swagger) {
-           // OpenAPI / Swagger
            formatName = 'OpenAPI/Swagger';
            newRules = importOpenAPI(json);
         } else {
@@ -104,7 +93,6 @@
         }
 
         if (newRules.length > 0) {
-           // Append to existing rules
            rules.update(current => [...current, ...newRules]);
            showToast(`Imported ${newRules.length} rules from ${formatName}`, "success");
         } else {
@@ -115,7 +103,7 @@
         console.error(err);
         showToast("Failed to parse file", "error");
       } finally {
-        input.value = ''; // Reset input
+        input.value = '';
       }
     };
     
@@ -125,16 +113,13 @@
   function createRuleFromLog(log: any) {
     let responseBody = log.responseBody;
     
-    // Try to parse JSON string if applicable
     if (typeof responseBody === 'string') {
       try {
         responseBody = JSON.parse(responseBody);
       } catch (e) {
-        // Keep as string if not valid JSON
       }
     }
 
-    // If body is still empty string or undefined, use default
     if (!responseBody && responseBody !== 0) {
        responseBody = { message: "Mocked from " + log.url };
     }
@@ -159,8 +144,6 @@
     editingId = rule.id;
     activeTab = 'body';
     
-    // Handle content display: if response is a string (function/code), show as is.
-    // If object, format as JSON.
     if (typeof rule.response === 'string') {
       editContent = rule.response;
     } else {
@@ -180,13 +163,12 @@
       const successHeaders = updateRuleHeaders(editingId, editHeadersContent);
       
       if (successBody && successHeaders) {
-        // Save other fields
         updateRuleUrl(editingId, editUrl);
         updateRuleMethod(editingId, editMethod);
         updateRuleStatus(editingId, parseInt(editStatus) || 200);
         updateRuleDelay(editingId, parseInt(editDelay) || 0);
 
-        editingId = null; // Exit edit mode
+        editingId = null; 
         showToast("Rule saved successfully", "success");
       } else {
         showToast("Invalid JSON format, please check Body or Headers!", "error");
@@ -201,7 +183,6 @@
   function formatJSON() {
     try {
       const currentContent = activeTab === 'body' ? editContent : editHeadersContent;
-      // Check if it's valid JSON first
       const parsed = JSON.parse(currentContent);
       const formatted = JSON.stringify(parsed, null, 2);
       
@@ -216,12 +197,11 @@
     }
   }
 
-  // Draggable logic
   let isDragging = false;
   let startX = 0;
   let startY = 0;
-  let initialRight = 0; // Anchor to RIGHT
-  let initialBottom = 0; // Anchor to BOTTOM
+  let initialRight = 0; 
+  let initialBottom = 0;
   let containerRef: HTMLDivElement;
   
   // Normalize position on mount to ensure consistent behavior
@@ -475,7 +455,6 @@
           </div>
         {/if}
         
-        <!-- Rule Filter Toolbar -->
         {#if $rules.length > 0}
           <div class="network-toolbar" style="margin-bottom: 12px; border-radius: 8px; border: 1px solid var(--pm-border);">
             <div class="search-box">
@@ -526,9 +505,6 @@
           {#each filteredRules as rule (rule.id)}
             <div class="card">
 
-                <!-- Preview Mode -->
-                <!-- svelte-ignore a11y-click-events-have-key-events -->
-                <!-- svelte-ignore a11y-no-static-element-interactions -->
                 <div
                   class="card-header"
                   role="button"
@@ -546,7 +522,7 @@
                     <span class="badge method" class:GET={rule.method === 'GET'} class:POST={rule.method === 'POST'} class:PUT={rule.method === 'PUT'} class:DELETE={rule.method === 'DELETE'}>{rule.method}</span>
                     <span class="url" title={rule.url}>{rule.url}</span>
                   </div>
-                  <!-- svelte-ignore a11y-no-static-element-interactions -->
+
                   <div class="header-actions" role="button" tabindex="-1" on:click|stopPropagation on:keydown={(e) => {
                     if (e.key === 'Enter' || e.key === ' ') {
                       e.preventDefault();
@@ -566,8 +542,6 @@
                     <Switch checked={rule.enabled} onChange={() => toggleRule(rule.id)} />
                   </div>
                 </div>
-                <!-- svelte-ignore a11y-click-events-have-key-events -->
-                <!-- svelte-ignore a11y-no-static-element-interactions -->
                 <div
                   class="card-meta"
                   role="button"
@@ -664,8 +638,6 @@
 </div>
 
 <style>
-  /* Custom Scrollbar Styles for Webkit browsers */
-  /* Target all scrollable elements within the component (Shadow DOM context) */
   :host::-webkit-scrollbar,
   ::-webkit-scrollbar {
     width: 8px;
@@ -673,14 +645,14 @@
   }
   :host::-webkit-scrollbar-track,
   ::-webkit-scrollbar-track {
-    background: var(--pm-bg-secondary); /* Match background */
+    background: var(--pm-bg-secondary);
     border-radius: 4px;
   }
   :host::-webkit-scrollbar-thumb,
   ::-webkit-scrollbar-thumb {
-    background: var(--pm-text-secondary); /* Scrollbar color */
+    background: var(--pm-text-secondary); 
     border-radius: 4px;
-    border: 2px solid var(--pm-bg-secondary); /* Padding effect */
+    border: 2px solid var(--pm-bg-secondary); 
   }
   :host::-webkit-scrollbar-thumb:hover,
   ::-webkit-scrollbar-thumb:hover {
@@ -691,14 +663,12 @@
     background: transparent;
   }
 
-  /* Reset & Base */
   * { box-sizing: border-box; }
 
   .container {
-    /* --- Theme Variables (Default: Dark) --- */
     --pm-bg: #1a1a1a;
-    --pm-bg-secondary: #252525; /* Cards, Log items */
-    --pm-bg-tertiary: #2a2a2a; /* Editor, Minimized */
+    --pm-bg-secondary: #252525; 
+    --pm-bg-tertiary: #2a2a2a;
     
     --pm-border: rgba(255,255,255,0.08);
     --pm-border-focus: rgba(255,255,255,0.2);
