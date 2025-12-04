@@ -1,4 +1,3 @@
-// src/core/store.ts
 import { writable } from 'svelte/store';
 import { updateRules as updateInterceptorRules } from './interceptor';
 import type { MockRule } from './types';
@@ -6,7 +5,6 @@ import type { MockRule } from './types';
 const STORAGE_KEY = 'pocket_mock_rules_v1';
 let isServerMode = false;
 
-// 修改 1: 添加 ! 断言，告诉 TS 这个变量会被赋值
 let resolveReady!: (value: void | PromiseLike<void>) => void;
 
 export const appReady = new Promise<void>((resolve) => {
@@ -15,19 +13,15 @@ export const appReady = new Promise<void>((resolve) => {
 
 export const rules = writable<MockRule[]>([]);
 
-// Export a method to update rules directly (used by importers)
 export const updateRules = (newRules: MockRule[]) => {
   rules.set(newRules);
 };
 
 // === Initialization logic ===
 export const initStore = async () => {
-  // 修改 2: 使用 try...finally 包裹所有逻辑
   try {
-    // Initialize as LocalStorage mode
     isServerMode = false;
 
-    // --- 阶段一：尝试连接 Server ---
     try {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 1000);
@@ -43,54 +37,34 @@ export const initStore = async () => {
         const data = await res.json();
 
         if (Array.isArray(data)) {
-                    rules.set(data);
-                    isServerMode = true;
-                    // console.log(`[PocketMock] Server Mode: Loaded ${data.length} rules`); // Remove log
-                    return; // ✅ 即使这里 return，下方的 finally 依然会执行！
-                  } else {
-                    isServerMode = false;
-                    // console.log('[PocketMock] Server response invalid, trying LocalStorage...'); // Remove log
-                  }
-                }
-              } catch (e) {
-                // Server 连接失败，静默失败，继续往下走
-                isServerMode = false;
-              }
-          
-              // --- 阶段二：降级读取 LocalStorage ---
-              try {
-                const json = localStorage.getItem(STORAGE_KEY);
-                if (json) {
-                  const data = JSON.parse(json);
-                  rules.set(data);
-                  // console.log(`[PocketMock] LocalStorage Mode: Loaded ${data.length} rules`); // Remove log
-                  return; // ✅ 即使这里 return，下方的 finally 依然会执行！
-                }
-              } catch (e) {
-                // console.error('[PocketMock] LocalStorage read failed:', e); // Remove log
-              }
-          
-              // --- 阶段三：完全没数据，使用默认 Demo ---
-              // const defaultRules = [{
-              //   id: 'demo-1',
-              //   url: '/api/demo',
-              //   method: 'GET',
-              //   response: { msg: 'Hello PocketMock' },
-              //   enabled: true,
-              //   delay: 500,
-              //   status: 200,
-              //   headers: {}
-              // }];
-          
-              // rules.set(defaultRules);
-              // console.log('[PocketMock] No rules found, starting empty.'); // Remove log
-            } finally {
-              // 修改 3: 这里的代码是“救命稻草”，无论上面发生了什么（报错、return、成功），这里都会执行
-              if (resolveReady) resolveReady();
-            }
-          };
+          rules.set(data);
+          isServerMode = true;
+          return;
+        } else {
+          isServerMode = false;
+        }
+      }
+    } catch (e) {
+      isServerMode = false;
+    }
 
-// === Subscription and save logic (保持不变) ===
+    try {
+      const json = localStorage.getItem(STORAGE_KEY);
+      if (json) {
+        const data = JSON.parse(json);
+        rules.set(data);
+        return;
+      }
+    } catch (e: any) {
+      throw new Error("Failed to parse JSON: Unknown error", e.message)
+    }
+
+
+  } finally {
+    if (resolveReady) resolveReady();
+  }
+};
+
 let saveTimer: any;
 rules.subscribe((value) => {
   updateInterceptorRules(value);
@@ -102,38 +76,27 @@ rules.subscribe((value) => {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(value, null, 2)
-      })// .catch(e => console.error('[PocketMock] File save failed:', e)); // Remove log
+      })
     } else {
       try {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(value));
       } catch (e) {
-        // console.error('[PocketMock] LocalStorage save failed:', e); // Remove log
       }
     }
   }, 500);
 });
 
-// ... 下面的 Actions (toggleRule, addRule 等) 保持原样即可 ...
 export const toggleRule = (id: string) => {
   rules.update(items => items.map(r => r.id === id ? { ...r, enabled: !r.enabled } : r));
 };
 
 export const updateRuleResponse = (id: string, newResponseContent: string) => {
   let parsedResponse: any;
-  
+
   try {
-    // 1. Try strict JSON parsing
     parsedResponse = JSON.parse(newResponseContent);
   } catch (e) {
-    // 2. If JSON fails, it might be:
-    //    a) A JS object literal: { a: 1 } (valid JS, invalid JSON)
-    //    b) A function: (req) => { ... }
-    //    c) A plain string: Hello World
-    
-    // We treat it as a string. The interceptor will decide how to execute it.
-    // However, to support { a: 1 } auto-conversion to JSON, we could try to evaluate it safely?
-    // For now, to support functions, we MUST save as string if it looks like a function.
-    
+
     parsedResponse = newResponseContent;
   }
 

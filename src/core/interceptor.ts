@@ -1,12 +1,11 @@
 import { requestLogs } from "./log-store";
 import { appReady } from './store';
 import { matchRoute } from './matcher';
-import type { MockRequest, MockRule } from './types'; // Use shared types
 import { generateMockData } from './smart-mock';
 
-export type { MockRule }; // Re-export for consumers if needed
+import type { MockRequest, MockRule } from './types';
+export type { MockRule };
 
-// Current rule list
 let activeRules: MockRule[] = []
 
 function getSpecificity(url: string): number {
@@ -15,7 +14,6 @@ function getSpecificity(url: string): number {
   return 100;
 }
 
-// Method for external updates to rules
 export function updateRules(rules: MockRule[]) {
   activeRules = [...rules].sort((a, b) => getSpecificity(b.url) - getSpecificity(a.url));
 }
@@ -26,17 +24,17 @@ async function createMockRequest(
   url: string,
   method: string,
   headers: Headers,
-  bodyData: any, // Raw body data can be string, FormData, etc.
+  bodyData: any,
   params: Record<string, string>
 ): Promise<MockRequest> {
-  const urlObj = new URL(url, window.location.origin); // Fix: Provide base for relative URLs
+  const urlObj = new URL(url, window.location.origin);
   const query: Record<string, string> = {};
-  urlObj.searchParams.forEach((value, key) => { // Query params from search string
+  urlObj.searchParams.forEach((value, key) => {
     query[key] = value;
   });
 
   const requestHeaders: Record<string, string> = {};
-  headers.forEach((value, key) => { // Headers iterator yields [key, value]
+  headers.forEach((value, key) => {
     requestHeaders[key] = value;
   });
 
@@ -45,13 +43,11 @@ async function createMockRequest(
   if (bodyData && typeof bodyData === 'string' && contentType.includes('application/json')) {
     try {
       jsonBody = JSON.parse(bodyData);
-    } catch (e) {
-      // console.warn('[PocketMock] Could not parse JSON body for MockRequest:', e); // Remove log
+    } catch (e: any) {
+      throw new Error('Failed to parse JSON: Unknown error');
     }
   }
 
-  // DX Enhancement: If body is parsed JSON, prioritize it for req.body
-  // This allows users to use req.body.key directly
   const finalBody = jsonBody || bodyData;
 
   return {
@@ -80,15 +76,14 @@ export function patchFetch() {
     const method = (init?.method || 'GET').toUpperCase();
     const requestHeaders = new Headers(init?.headers);
 
-    // Extract body data for createMockRequest
     let bodyData: any = init?.body;
-    if (bodyData instanceof FormData) { // Convert FormData to object for easier access
+    if (bodyData instanceof FormData) {
       const formDataObj: Record<string, string> = {};
       for (const pair of bodyData.entries()) {
         formDataObj[pair[0]] = pair[1].toString();
       }
       bodyData = formDataObj;
-    } else if (bodyData instanceof URLSearchParams) { // Convert URLSearchParams to object
+    } else if (bodyData instanceof URLSearchParams) {
       const urlSearchParamsObj: Record<string, string> = {};
       for (const pair of bodyData.entries()) {
         urlSearchParamsObj[pair[0]] = pair[1].toString();
@@ -104,7 +99,6 @@ export function patchFetch() {
 
     if (matchResult) {
       const { rule, match } = matchResult;
-      // console.log(`[PocketMock] Fetch intercepted: ${method} ${url}`); // Remove log
 
       if (rule.delay > 0) {
         await sleep(rule.delay);
@@ -112,17 +106,13 @@ export function patchFetch() {
 
       let resolvedResponse: any = rule.response;
 
-      // Hydrate string response if it looks like code (function or object literal)
       if (typeof resolvedResponse === 'string') {
         const trimmed = resolvedResponse.trim();
-        // Check for function signature or object/array literal
         if (trimmed.startsWith('(') || trimmed.startsWith('function') || trimmed.includes('=>') || trimmed.startsWith('{') || trimmed.startsWith('[')) {
           try {
-            // Safe-ish evaluation to turn string into JS object/function
             const evaluated = new Function('return ' + resolvedResponse)();
             resolvedResponse = evaluated;
           } catch (e) {
-            // Keep as string if eval fails
           }
         }
       }
@@ -132,20 +122,15 @@ export function patchFetch() {
         try {
           resolvedResponse = await Promise.resolve(resolvedResponse(mockRequest));
         } catch (e) {
-          // console.error('[PocketMock] Error executing response function:', e); // Remove log
           resolvedResponse = { status: 500, body: { error: 'Mock function execution failed' } };
         }
       }
 
-      // Add this new section for smart mock data generation
       if (resolvedResponse && typeof resolvedResponse === 'object' && !Object.prototype.hasOwnProperty.call(resolvedResponse, 'body')) {
-        // Only apply generateMockData if it's a plain object (JSON template)
-        // and not already a structured response with 'body', 'status', 'headers'
         try {
           resolvedResponse = generateMockData(resolvedResponse);
         } catch (e) {
           console.error('[PocketMock] Error generating mock data:', e);
-          // Keep original response or set error message
         }
       }
 
@@ -155,9 +140,7 @@ export function patchFetch() {
       let responseStatus = rule.status;
       let responseHeaders = rule.headers || {};
 
-      // Handle full Response object returned by function
       if (resolvedResponse instanceof Response) {
-        // If the function returns a Response object, use it directly
         requestLogs.add({
           method,
           url,
@@ -169,13 +152,11 @@ export function patchFetch() {
         return resolvedResponse;
       }
 
-      // Handle { body, status, headers } object returned by function (or standard rule.response)
       if (resolvedResponse && typeof resolvedResponse === 'object' && Object.prototype.hasOwnProperty.call(resolvedResponse, 'body')) {
         responseContent = resolvedResponse.body;
         responseStatus = resolvedResponse.status || rule.status;
         responseHeaders = { ...responseHeaders, ...resolvedResponse.headers };
       }
-      // Else, use resolvedResponse as direct content
 
       requestLogs.add({
         method,
@@ -191,7 +172,7 @@ export function patchFetch() {
         {
           status: responseStatus,
           headers: {
-            'Content-Type': 'application/json', // Default to JSON content type
+            'Content-Type': 'application/json',
             ...responseHeaders
           }
         }
@@ -226,7 +207,6 @@ export function patchFetch() {
         responseBody
       });
     }).catch(() => {
-      // Network error, usually handled by browser console, but we could log it as status 0
       requestLogs.add({
         method,
         url,
@@ -252,12 +232,16 @@ function patchXHR() {
     private _requestHeaders: Headers = new Headers();
     private _requestBody: any = undefined;
 
-    open(method: string, url: string | URL, ...args: any[]) {
+    open(method: string, url: string | URL, async?: boolean, user?: string | null, password?: string | null) {
       this._url = url.toString();
       this._method = method.toUpperCase();
       this._startTime = performance.now();
-      // @ts-ignore
-      super.open(method, url, ...args);
+
+      if (async !== undefined) {
+        super.open(method, url, async, user, password);
+      } else {
+        super.open(method, url);
+      }
     }
 
     setRequestHeader(name: string, value: string) {
@@ -453,7 +437,6 @@ function patchXHR() {
     }
   }
 
-  // @ts-ignore
   window.XMLHttpRequest = PocketXHR;
 }
 

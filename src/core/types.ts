@@ -3,10 +3,10 @@ export interface MockRequest {
   url: string;
   method: string;
   headers: Record<string, string>;
-  body: any; // Raw body
-  json: any; // Parsed JSON body if content-type is application/json
-  params: Record<string, string>; // Path parameters from rule matching
-  query: Record<string, string>; // Query parameters
+  body: any;
+  json: any;
+  params: Record<string, string>;
+  query: Record<string, string>;
 }
 
 export type DynamicResponseFunction = (req: MockRequest) => any | Promise<any>;
