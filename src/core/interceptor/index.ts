@@ -3,6 +3,7 @@ import { appReady } from '@/store/store';
 import { matchRoute } from './matcher';
 import { generateMockData } from './smart-mock';
 import { createMockRequest } from './mock-request'
+import { formatRequestPayload, formatHeaders } from './utils'
 
 import type { MockRule } from './types';
 
@@ -49,7 +50,6 @@ export function patchFetch() {
       }
       bodyData = urlSearchParamsObj;
     }
-
 
     const matchResult = activeRules.map(r => ({
       rule: r,
@@ -162,7 +162,9 @@ export function patchFetch() {
         timestamp: Date.now(),
         duration,
         isMock: false,
-        responseBody
+        responseBody,
+        requestPayload: formatRequestPayload(bodyData),
+        requestHeaders: formatHeaders(requestHeaders)
       });
     }).catch(() => {
       requestLogs.add({
@@ -172,7 +174,9 @@ export function patchFetch() {
         timestamp: Date.now(),
         duration: Math.round(performance.now() - startTime),
         isMock: false,
-        responseBody: '[Network Error]'
+        responseBody: '[Network Error]',
+        requestPayload: formatRequestPayload(bodyData),
+        requestHeaders: formatHeaders(requestHeaders)
       });
     });
 
@@ -319,7 +323,9 @@ function patchXHR() {
 
             requestLogs.add({
               method: this._method, url: this._url, status: actualStatus, timestamp: Date.now(), duration, isMock: true,
-              responseBody: responseData
+              responseBody: responseData,
+              requestPayload: formatRequestPayload(bodyData),
+              requestHeaders: formatHeaders(this._requestHeaders)
             });
 
             setTimeout(() => {
@@ -369,7 +375,9 @@ function patchXHR() {
               timestamp: Date.now(),
               duration,
               isMock: false,
-              responseBody
+              responseBody,
+              requestPayload: formatRequestPayload(this._requestBody),
+              requestHeaders: formatHeaders(this._requestHeaders)
             });
           });
 
@@ -381,7 +389,9 @@ function patchXHR() {
               timestamp: Date.now(),
               duration: Math.round(performance.now() - this._startTime),
               isMock: false,
-              responseBody: '[Network Error]'
+              responseBody: '[Network Error]',
+              requestPayload: formatRequestPayload(this._requestBody),
+              requestHeaders: formatHeaders(this._requestHeaders)
             });
           });
 

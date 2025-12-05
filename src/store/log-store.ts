@@ -9,6 +9,8 @@ export interface LogEntry {
   duration: number;
   isMock: boolean;
   responseBody?: string;
+  requestPayload?: string;
+  requestHeaders?: string;
 }
 
 function createLogStore() {

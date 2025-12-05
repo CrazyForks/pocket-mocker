@@ -75,7 +75,7 @@ const app = document.querySelector<HTMLDivElement>('#app')!;
 app.innerHTML = `
   <div class="demo-container">
     <header class="hero">
-      <div class="logo-badge">🛠️ PocketMock</div>
+      <div class="logo-badge">PocketMock</div>
       <h1>Browser-Native API Mocking</h1>
       <p>Intercept, Modify, and Debug HTTP requests without leaving your UI.</p>
     </header>
@@ -144,6 +144,54 @@ app.innerHTML = `
         <div class="log-placeholder">// Waiting for requests...</div>
       </div>
     </div>
+
+    <div class="tutorial-section">
+      <h2>PocketMock Tutorial:</h2>
+      <p>Welcome to PocketMock! This is a powerful, browser-native API mocking tool that helps you intercept, modify, and debug HTTP requests directly in your browser.</p>
+
+      <h3>1. Overview:</h3>
+      <ul>
+        <li>PocketMock works by intercepting requests made from your browser.</li>
+        <li>You can define custom rules to mock responses, introduce delays, simulate errors, and even use dynamic data generators.</li>
+      </ul>
+
+      <h3>2. Defining Rules:</h3>
+      <p>Rules are defined using <code>addRule(url, method, response)</code>.</p>
+      <ul>
+        <li><code>url</code>: The URL pattern to match (e.g., "/api/user/profile").</li>
+        <li><code>method</code>: The HTTP method (e.g., "GET", "POST").</li>
+        <li><code>response</code>: Can be a static JSON object, a function for dynamic responses, or a status code.</li>
+      </ul>
+      <p>Examples from this demo:</p>
+      <ul>
+        <li><code>profileRule</code>: Demonstrates smart data generation with <code>@guid</code>, <code>@name</code>, etc.</li>
+        <li><code>loginRule</code>: Shows how to use a function to create dynamic responses based on request body (e.g., username 'admin').</li>
+        <li><code>errorRule</code>: Simulates a 500 server error with a custom error message.</li>
+      </ul>
+
+      <h3>3. Interacting with the Dashboard:</h3>
+      <ul>
+        <li>The PocketMock dashboard (opened by default) provides a UI to manage all your mock rules.</li>
+        <li>You can enable/disable rules, edit their responses, and observe network traffic.</li>
+        <li>Try clicking the "Fetch Profile", "Login", and "Trigger 500" buttons in the demo UI to see the mock rules in action and observe the responses in the "Live Network Traffic" monitor below.</li>
+      </ul>
+
+      <h3>4. Key Features:</h3>
+      <ul>
+        <li>Request Interception: Intercepts XHR and Fetch requests.</li>
+        <li>Dynamic Responses: Use functions for advanced mocking logic.</li>
+        <li>Data Generation: Supports a wide range of data types using simple syntax.</li>
+        <li>Delay Simulation: Add artificial network delays to test loading states.</li>
+        <li>Error Simulation: Easily test error handling in your application.</li>
+        <li>URL Matching: Supports exact matches and basic pattern matching.</li>
+      </ul>
+
+      <h3>Get Started:</h3>
+      <ul>
+        <li>Open the PocketMock dashboard to see and manage your rules.</li>
+        <li>Refer to the official <a href="https://github.com/tianchangNorth/pocket-mocker" target="_blank" style="color:white">PocketMock documentation</a> for more advanced features!</li>
+      </ul>
+    </div>
   </div>
 `;
 
@@ -209,8 +257,42 @@ style.textContent = `
   .hero p {
     color: var(--text-muted);
     font-size: 1.2rem;
-    max-width: 600px;
+    max-width: 800px;
     margin: 0 auto;
+  }
+  
+  .tutorial-section {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 24px;
+    margin-top: 40px;
+  }
+
+  .tutorial-section h2 {
+    color: var(--primary);
+    margin-top: 0;
+    font-size: 1.8rem;
+  }
+
+  .tutorial-section h3 {
+    color: var(--accent);
+    margin-top: 20px;
+    margin-bottom: 10px;
+    font-size: 1.2rem;
+  }
+
+  .tutorial-section p, .tutorial-section li {
+    color: var(--text-muted);
+    font-size: 0.95rem;
+    line-height: 1.6;
+    margin-bottom: 8px;
+  }
+
+  .tutorial-section ul {
+    list-style: disc;
+    padding-left: 20px;
+    margin-bottom: 15px;
   }
 
   .grid-layout {
