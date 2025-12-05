@@ -25,7 +25,7 @@
 - [技术原理](#技术原理)
 - [贡献](#贡献)
 
-![PocketMocker Demo](public/pocket.webp)
+![PocketMocker Demo](../public/pocket.webp)
 
 **PocketMocker** 是一款零侵入的前端 Mock 工具。与 Postman 或传统的 `mock.js` 不同，它直接**嵌入在你的页面中**，让你在开发时可以实时拦截 `fetch` and `XMLHttpRequest`，动态修改响应数据、模拟网络延迟和异常状态码。
 
