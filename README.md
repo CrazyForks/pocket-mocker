@@ -150,7 +150,7 @@ PocketMock includes a powerful **Smart Mock Generator** that allows you to creat
 }
 ```
 
-### 📥 Config Import
+### Config Import
 
 Import mock rules directly from popular API documentation formats with auto-conversion.
 
