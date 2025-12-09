@@ -162,7 +162,6 @@ const generators: Record<string, MockGenerator> = {
 
 export function generateMockData(template: any): any {
   if (template === null || typeof template !== 'object') {
-    // Handle string generators for primitive string values
     if (typeof template === 'string') {
       const matchGenerator = template.match(/^@([a-zA-Z_]+)(?:\((.*)\))?$/);
       if (matchGenerator) {
