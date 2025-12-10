@@ -204,11 +204,11 @@ PocketMock 内置强大的生成器，使用简单语法即可生成逼真的测
 
 请阅读我们的 [贡献指南](docs/CONTRIBUTING.zh-CN.md) 了解如何参与项目。
 
-### 联系我
-
-如果您有任何疑问、建议或想与我交流，可以通过以下方式联系：
-
-![我的微信](https://res.oafimg.cn/-/f69b6474980d7347/wechat.jpg)
+<div align="center">
+  <h3>联系我</h3>
+  <p>如果您有任何疑问、建议或想与我交流，可以通过以下方式联系：</p>
+  <img src="https://res.oafimg.cn/-/f69b6474980d7347/wechat.jpg" alt="我的微信" width="200px">
+</div>
 
 ## 📄 开源协议
 
