@@ -157,7 +157,7 @@ PocketMock 内置强大的生成器，使用简单语法即可生成逼真的测
 
 ### 动态响应 (Dynamic Response)
 
-不再局限于静态 JSON！你可以编写 JavaScript 函数来根据请求动态生成响应。
+不再局限于静态 JSON！你可以在编辑器中编写 JavaScript 函数来根据请求动态生成响应。
 
 ```javascript
 (req) => {
