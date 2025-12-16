@@ -40,25 +40,22 @@
 
 In simple terms, it lets you decide what your API responses should be—without touching the backend or setting up a mock server.
 
-It allows you to **intercept**, **override**, and **manipulate** HTTP responses directly on your browser page, without setting up a mock server or leaving your development environment.
-
-Combining **Mocking** capabilities with **HTTP Control**, PocketMocker empowers you to build robust UIs faster by simulating any network scenario instantly.
+It provides a **visual control panel** directly in your browser to **intercept**, **override**, and **manipulate** HTTP responses, helping you build robust UIs faster by seeing changes instantly.
 
 ---
 
 ## Why PocketMocker?
 
 ### Mock Effortlessly
-Stop writing throwaway mock code. Intercept `fetch` and `XHR` requests automatically. Use smart syntax to generate realistic data (names, emails, dates) or import existing Postman/OpenAPI collections.
+Stop writing mock code. Intercept requests automatically, generate smart data, import API docs with one click.
 
 ### Control Completely
-Gain God-mode access to your network layer.
-*   **Timing**: Simulate network latency or race conditions.
-*   **Status**: Force 500 errors, 401 unauth states, or 204 empty responses.
-*   **Payload**: Inject edge-case data (nulls, long strings) to test robustness.
+*   **Timing**: Simulate network latency, race conditions
+*   **Status**: Force 500 errors, 401 unauthorized, empty responses
+*   **Payload**: Test edge cases and exception scenarios
 
 ### Debug Instantly
-Stay in the flow. Tweak responses in the embedded panel and see your UI update immediately. No context switching to external apps, no restarting servers.
+Edit responses directly in your browser and see UI updates instantly. No tool switching, stay in the flow.
 
 ---
 
@@ -76,19 +73,6 @@ Simulate network delays (latency), timeout errors, or unauthorized (401) respons
 ---
 
 https://github.com/user-attachments/assets/e7501191-ef1-4bd4-bd21-6500585fe4ad.mp4
-
-## When to use PocketMocker?
-
-**Use Postman for:**
-*   API Design & Documentation
-*   Backend Contract Testing
-*   Team-level API Management
-
-**Use PocketMocker for:**
-*   **Rapid UI Development**: "I need this list to be empty *right now*."
-*   **Visual Debugging**: "Why is my error boundary not showing up?"
-*   **Zero Context Switching**: Stay in your browser, stay in the flow.
-*   **Git-Friendly**: Share mock rules via config files, just like your code.
 
 ---
 
