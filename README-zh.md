@@ -12,9 +12,6 @@
   <a href="https://github.com/tianchangNorth/pocket-mocker/actions/workflows/ci.yml" target="_blank">
     <img src="https://img.shields.io/github/actions/workflow/status/tianchangNorth/pocket-mocker/ci.yml?branch=main&style=for-the-badge&logo=github" alt="CI 状态" />
   </a>
-  <a href="https://github.com/tianchangNorth/pocket-mocker" target="_blank">
-    <img src="https://atomgit.com/tianchangNorth/pocket-mocker/star/badge.svg" alt="star" />
-  </a>
 </p>
 
 <p>
