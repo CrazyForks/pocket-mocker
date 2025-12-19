@@ -15,17 +15,34 @@
   let editMethod = "GET";
   let editStatus: string = "200";
   let editDelay: string = "0";
+  let editorLang: 'json' | 'javascript' = 'json';
   
   const METHODS = ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"];
   let currentRuleId: string | null = null;
+
+  function detectLanguage(content: string): 'json' | 'javascript' {
+    if (!content) return 'json';
+    try {
+      JSON.parse(content);
+      return 'json';
+    } catch {
+      const trimmed = content.trim();
+      if (trimmed.startsWith('{') || trimmed.startsWith('[')) {
+         return 'json';
+      }
+      return 'javascript';
+    }
+  }
 
   $: if (rule && rule.id !== currentRuleId) {
     currentRuleId = rule.id;
     
     if (typeof rule.response === 'string') {
       editContent = rule.response;
+      editorLang = detectLanguage(editContent);
     } else {
       editContent = JSON.stringify(rule.response, null, 2);
+      editorLang = 'json';
     }
     
     editHeadersContent = JSON.stringify(rule.headers || {}, null, 2);
@@ -33,6 +50,10 @@
     editMethod = rule.method;
     editStatus = String(rule.status || 200);
     editDelay = String(rule.delay || 0);
+  }
+  
+  $: if ($uiState.activeRuleTab === 'body') {
+     editorLang = detectLanguage(editContent);
   }
 
   function saveEdit() {
@@ -135,6 +156,7 @@
         value={editContent}
         on:change={(e) => (editContent = e.detail)}
         height="100%"
+        lang={editorLang}
       />
     {:else}
       <JsonEditor
